@@ -6,7 +6,7 @@
     <title>Recorrido VR Web</title>
 
     <!-- A-Frame -->
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
 
     <style>
       body {
@@ -15,30 +15,33 @@
       }
     </style>
   </head>
+
   <body>
     <!-- Escena VR -->
-    <a-scene>
+    <a-scene id="sceneMain">
       <!-- Cielo o fondo -->
-      <a-sky color="#222a35"></a-sky>
+      <a-sky id="sky" src="sky.png" rotation="0 -90 0"></a-sky>
 
       <!-- Piso -->
       <a-plane
+        id="floor"
         color="#555"
         rotation="-90 0 0"
         width="20"
         height="20"
       ></a-plane>
 
-      <!-- Cubo de prueba -->
-      <a-box
-        position="0 1.5 -3"
-        color="#4CC3D9"
-        shadow
-        animation="property: rotation; to: 0 360 0; loop: true; dur: 5000"
-      ></a-box>
+      <a-entity gltf-model="NS74Test.glb" position="0 -0.76246 0"></a-entity>
+
 
       <!-- Cámara con controles -->
-      <a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>
+      <a-entity
+        id="cameraRig"
+        camera
+        look-controls
+        wasd-controls
+        position="0 1.6 0"
+      ></a-entity>
     </a-scene>
   </body>
 </html>
