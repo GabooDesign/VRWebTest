@@ -31,17 +31,29 @@
         height="20"
       ></a-plane>
 
-      <a-entity gltf-model="NS74Test.glb" position="0 -0.76246 0"></a-entity>
 
-
-      <!-- Cámara con controles -->
       <a-entity
         id="cameraRig"
         camera
-        look-controls
+        look-controls="pointerLockEnabled: true"
         wasd-controls
-        position="0 1.6 0"
-      ></a-entity>
+        position="0 1.6 0">
+      </a-entity>
+
+      <!-- Control derecho -->
+      <a-entity
+        id="rightHand"
+        oculus-touch-controls="hand: right"
+        hand-controls="hand: right">
+      </a-entity>
+
+      <!-- Control izquierdo -->
+      <a-entity
+        id="leftHand"
+        oculus-touch-controls="hand: left"
+        hand-controls="hand: left">
+      </a-entity>
+
     </a-scene>
   </body>
 </html>
