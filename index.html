@@ -1,59 +1,188 @@
 <!DOCTYPE html>
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Recorrido VR Web</title>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Tour 360 Metro</title>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+</head>
 
-    <!-- A-Frame -->
-    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+<body>
+<a-scene>
 
-    <style>
-      body {
-        margin: 0;
-        overflow: hidden;
+  <!-- Assets -->
+  <a-assets>
+    <img id="escena1" src="escena1.jpg">
+    <img id="escenaPuertas" src="Escena1.png">
+    <img id="escenaMapa" src="Escena2.png">
+  </a-assets>
+
+  <!-- Fondo -->
+  <a-sky id="sky" src="#escena1"></a-sky>
+
+  <!-- HOTSPOTS -->
+
+  <a-entity 
+    class="clickable"
+    geometry="primitive: circle; radius: 0.3"
+    material="color: red; shader: flat"
+    position="1 1.5 -2"
+    animation="property: scale; to: 1.2 1.2 1.2; dir: alternate; loop: true"
+    onclick="changeScene('#escenaPuertas')">
+  </a-entity>
+
+  <a-entity 
+    class="clickable"
+    geometry="primitive: circle; radius: 0.3"
+    material="color: blue; shader: flat"
+    position="-1 1.5 -2"
+    animation="property: scale; to: 1.2 1.2 1.2; dir: alternate; loop: true"
+    onclick="changeScene('#escenaMapa')">
+  </a-entity>
+
+  <!-- BOTÓN VOLVER -->
+  <a-entity 
+    id="btnBack"
+    visible="false"
+    class="clickable"
+    geometry="primitive: plane; height: 0.4; width: 1"
+    material="color: black; opacity: 0.7"
+    position="0 1.2 -1.5"
+    onclick="goBack()">
+
+    <a-text value="Volver" align="center" color="white"></a-text>
+  </a-entity>
+
+  <!-- CÁMARA -->
+  <a-entity camera look-controls>
+
+    <a-entity 
+      id="cursor"
+      position="0 0 -1"
+      geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.015"
+      material="color: white; shader: flat"
+      cursor="fuse: true; fuseTimeout: 1200"
+      raycaster="objects: .clickable; far: 10">
+
+      <a-entity
+        id="progress"
+        geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.025; thetaLength: 0"
+        material="color: cyan; shader: flat">
+      </a-entity>
+
+    </a-entity>
+
+    <a-entity 
+      id="fade"
+      geometry="primitive: sphere; radius: 0.5"
+      material="color: black; opacity: 0; side: back"
+      position="0 0 0">
+    </a-entity>
+
+  </a-entity>
+
+</a-scene>
+
+<script>
+
+let currentScene = "#escena1";
+
+function fadeIn(callback) {
+  const fade = document.querySelector('#fade');
+  fade.setAttribute('animation', {
+    property: 'material.opacity',
+    to: 1,
+    dur: 400,
+    easing: 'easeInOutQuad'
+  });
+
+  setTimeout(callback, 400);
+}
+
+function fadeOut() {
+  const fade = document.querySelector('#fade');
+  fade.setAttribute('animation', {
+    property: 'material.opacity',
+    to: 0,
+    dur: 400,
+    easing: 'easeInOutQuad'
+  });
+}
+
+function changeScene(sceneId) {
+  fadeIn(() => {
+
+    const sky = document.querySelector('#sky');
+    sky.setAttribute('src', sceneId);
+
+    document.querySelectorAll('.clickable').forEach(el => {
+      if (el.id !== "btnBack") {
+        el.setAttribute('visible', false);
       }
-    </style>
-  </head>
+    });
 
-  <body>
-    <!-- Escena VR -->
-    <a-scene id="sceneMain">
-      <!-- Cielo o fondo -->
-      <a-sky id="sky" src="sky.png" rotation="0 -90 0"></a-sky>
+    document.querySelector('#btnBack').setAttribute('visible', true);
 
-      <!-- Piso -->
-      <a-plane
-        id="floor"
-        color="#555"
-        rotation="-90 0 0"
-        width="20"
-        height="20"
-      ></a-plane>
+    currentScene = sceneId;
+
+    fadeOut();
+  });
+}
+
+function goBack() {
+  fadeIn(() => {
+
+    const sky = document.querySelector('#sky');
+    sky.setAttribute('src', '#escena1');
+
+    document.querySelectorAll('.clickable').forEach(el => {
+      if (el.id !== "btnBack") {
+        el.setAttribute('visible', true);
+      }
+    });
+
+    document.querySelector('#btnBack').setAttribute('visible', false);
+
+    currentScene = "#escena1";
+
+    fadeOut();
+  });
+}
 
 
-      <a-entity
-        id="cameraRig"
-        camera
-        look-controls="pointerLockEnabled: true"
-        wasd-controls
-        position="0 1.6 0">
-      </a-entity>
+const cursor = document.querySelector('#cursor');
+const progress = document.querySelector('#progress');
 
-      <!-- Control derecho -->
-      <a-entity
-        id="rightHand"
-        oculus-touch-controls="hand: right"
-        hand-controls="hand: right">
-      </a-entity>
+let fuseTimeout = 1200;
+let startTime = null;
+let hovering = false;
 
-      <!-- Control izquierdo -->
-      <a-entity
-        id="leftHand"
-        oculus-touch-controls="hand: left"
-        hand-controls="hand: left">
-      </a-entity>
+cursor.addEventListener('mouseenter', () => {
+  hovering = true;
+  startTime = Date.now();
+  animateProgress();
+  cursor.setAttribute('material', 'color', 'cyan');
+});
 
-    </a-scene>
-  </body>
+cursor.addEventListener('mouseleave', () => {
+  hovering = false;
+  progress.setAttribute('geometry', 'thetaLength', 0);
+  cursor.setAttribute('material', 'color', 'white');
+});
+
+function animateProgress() {
+  if (!hovering) return;
+
+  const elapsed = Date.now() - startTime;
+  const percent = Math.min(elapsed / fuseTimeout, 1);
+
+  progress.setAttribute('geometry', 'thetaLength', percent * 360);
+
+  if (percent < 1) {
+    requestAnimationFrame(animateProgress);
+  }
+}
+
+</script>
+
+</body>
 </html>
