@@ -1,2 +1,2 @@
-# VRWebTest
-Tests para aprender a hacer experiencias en VR para web
+# MetroVR
+Test de plataforma para ir intercambiando imagenes 360 a partir de interacción
